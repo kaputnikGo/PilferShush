@@ -1,0 +1,29 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.cityfreqs.pilfershush.MainActivity" >
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="10"
+        android:showAsAction="never"
+        android:title="@string/action_settings"/>
+    <item
+        android:id="@+id/action_audio_scan_settings"
+        android:orderInCategory="20"
+        android:showAsAction="never"
+        android:title="@string/action_audio_scan_settings"/>
+    
+    <item
+        android:id="@+id/action_audio_beacons"
+        android:orderInCategory="30"
+        android:showAsAction="never"
+        android:title="@string/action_audio_beacons"/>
+     
+    <item
+        android:id="@+id/action_override_scan"
+        android:orderInCategory="40"
+        android:showAsAction="never"
+        android:title="@string/action_override_scan"/>     
+    
+
+</menu>

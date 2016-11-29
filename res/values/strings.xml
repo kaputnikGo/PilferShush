@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PilferShush</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Polling Speed</string>
+    <string name="dialog_polling">Mic polling speed</string>
+    
+    <string name="action_audio_scan_settings">Audio Scan settings</string>
+    <string name="dialog_freq_step">Frequency step (Hz)</string>
+    
+    
+    <string name="action_audio_beacons">Check Beacon Apps</string>
+    <string name="dialog_audio_beacon_apps">Audio Beacon List</string>
+    
+    <string name="action_override_scan">Scan User App</string>
+    <string name="dialog_override_scan_apps">Scan Apps List</string>
+    
+    <string name="dialog_cautioned">Cautioned List</string>
+    <string name="action_services">get Services</string>
+    <string name="dialog_services">User Apps with Services</string>
+    
+    <string name="action_receivers">get Receivers</string>
+    <string name="dialog_receivers">User Apps with Receivers</string>
+    
+    <string name="focus_text">Audio Focus Listener: </string>
+    <string name="debug_text">loading PilferShush.</string>
+    <string name="mic_check_button_text">MICROPHONE CHECK</string>
+    <string name="mic_polling_button_text">POLLING CHECK</string>
+    
+    <string name="run_scans_button_text">Run Scanner</string>
+    <string name="debug_view_button_text">Detailed View</string>
+    <string name="main_view_button_text">Simple View</string>
+    <string name="main_scan_text">PilferShush scanner ready</string>
+
+</resources>
