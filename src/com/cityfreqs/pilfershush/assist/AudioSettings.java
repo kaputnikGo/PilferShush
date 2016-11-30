@@ -128,6 +128,9 @@ public class AudioSettings {
  * Utilities, that may be useful...
  * 
  */
+	public static int getAudioLength(int samplesCount, int sampleRate, int channels) {
+        return ((samplesCount / channels) * 1000) / sampleRate;
+	}
 	
 	public static int getClosestPowersHigh(int reported) {
 		// return the next highest power from the minimum reported

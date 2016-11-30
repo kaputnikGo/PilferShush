@@ -55,7 +55,7 @@ public class AudioChecker {
 	            		AudioFormat.CHANNEL_IN_MONO, 
 	            		AudioFormat.CHANNEL_IN_STEREO }) {
 	                try {
-	                    MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channel: "+ channelConfig);
+	                    MainActivity.logger("Try rate " + rate + "Hz, enc: " + audioFormat + ", channel: "+ channelConfig);
 	                    
 	                    int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
 	                    if (buffSize != AudioRecord.ERROR_BAD_VALUE) {

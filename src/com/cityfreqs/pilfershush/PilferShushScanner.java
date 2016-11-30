@@ -76,11 +76,6 @@ public class PilferShushScanner {
 		audioScanner.runAudioScanner();
 	}
 	
-	protected byte[] getRecordBuffer() {
-		return audioScanner.getFreqDetector().getRecordTask().getRecordBuffer();
-	}
-	
-	
 	protected void stopAudioScanner() {
 		if (audioScanner != null) {
 			entryLogger("AudioScanning stop.", false);

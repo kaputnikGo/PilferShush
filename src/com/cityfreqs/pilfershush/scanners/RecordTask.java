@@ -16,26 +16,31 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	private static final String TAG = "RecordTask";
 	
 	private short[] bufferArray;
-	//private double[] dArr;
+	private double[] recordScan;
 	private RecordTaskListener recordTaskListener;		
 	private AudioRecord audioRecord;
 	private AudioSettings audioSettings;
 	private int bufferRead;
 	private int freqStepper;
-	private Integer[] tempBuffer;
-	private ArrayList<Integer[]> bufferStorage;
-	private HashMap<Integer, Integer> freqMap;
+	private int candidateFreq;
+	private double minMagnitude;
+	private double[] scanArray;
 	private byte[] byteBuffer;
+	private ArrayList<short[]> bufferStorage;
+	private HashMap<Integer, Integer> freqMap;
 	
 	public RecordTask(AudioSettings audioSettings, int freqStepper) {	
 		this.audioSettings = audioSettings;
 		this.freqStepper = freqStepper;
+		minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE;
 		bufferArray = new short[audioSettings.getBufferSize()];
-		
-		bufferStorage = new ArrayList<Integer[]>();
+		bufferStorage = new ArrayList<short[]>();
 		
 		if (audioRecord == null) {
 			try {
+				//TODO
+				// get buffer in powersOfTwo higher than minBufferSize?
+				// we have 48Hz samRate...
 				audioRecord = new AudioRecord(audioSettings.getAudioSource(), 
 						audioSettings.getSampleRate(), 
 						audioSettings.getChannel(), 
@@ -55,14 +60,14 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 		this.recordTaskListener = recordTaskListener;
 	}
 	
-	public boolean runCurrentBufferScan() {
+	public boolean runCurrentBufferScan(ArrayList<Integer> freqList) {
 		// get rid of audioRecord
 		if (audioRecord != null) {
 			audioRecord = null;
 		}
 		if (bufferStorage != null) {
 			activityLogger("run Buffer Scan...");
-			 return magnitudeBufferScan(AudioSettings.DEFAULT_WINDOW_TYPE);
+			 return magnitudeBufferScan(AudioSettings.DEFAULT_WINDOW_TYPE, freqList);
 		}
 		else {
 			activityLogger("Buffer Scan storage null.");
@@ -79,7 +84,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 		return false;
 	}
 	
-	protected ArrayList<Integer[]> getBufferStorage() {
+	protected ArrayList<short[]> getBufferStorage() {
 		return bufferStorage;
 	}	
 	
@@ -100,10 +105,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	protected HashMap<Integer, Integer> getFrequencyCountMap() {
 		return freqMap;
 	}
-	
-	public byte[] getRecordBuffer() {
-		return byteBuffer; 
-	}
+
 	
 /********************************************************************/	
 	
@@ -151,8 +153,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 						MainActivity.visualiserView.updateVisualiser(byteBuffer);
 					}
 				});
-
-				// check for a stop
+				// bufferArray IS short[], NOT byte[]
 				do {
 					bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
 				} while (!isCancelled());
@@ -188,41 +189,28 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
 	private void magnitudeRecordScan(int windowType) {	
 		if (bufferRead > 0) {
-			int i;
-			double[] dArr = new double[audioSettings.getBufferSize()];
-			tempBuffer = new Integer[audioSettings.getBufferSize()];
+			recordScan = new double[audioSettings.getBufferSize()];
 			byteBuffer = new byte[audioSettings.getBufferSize()];
 			
-			for (i = 0; i < dArr.length; i++) {
-				dArr[i] = (double)bufferArray[i];
-				tempBuffer[i] = (int)bufferArray[i];
+			for (int i = 0; i < recordScan.length; i++) {
+				recordScan[i] = (double)bufferArray[i];
 				byteBuffer[i] = (byte)bufferArray[i];
 			}
+
+			recordScan = windowArray(windowType, recordScan);				
+			candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
+			Goertzel goertzel;	
+			double candidateMag;
 			
-			// default value set to 2
-			dArr = windowArray(windowType, dArr);				
-			int candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
-			
-			// this only sets the default as a double: 
-			double minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE; // need a minimum here?			
-			
-			while (candidateFreq <= AudioSettings.DEFAULT_FREQUENCY_MAX) {
-				// look for any of our freqs here, increment by freqStepper
-				// this will result in a found candidate for anything in our ranges...
-				
-				// set Goertzel up to look for candidate in dArr
-				Goertzel goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, dArr);
+			while (candidateFreq <= AudioSettings.DEFAULT_FREQUENCY_MAX) {	
+				goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, recordScan);
 				goertzel.initGoertzel();
+				candidateMag = goertzel.getOptimisedMagnitude();
 				
-				// get its magnitude
-				double candidateMag = goertzel.getOptimisedMagnitude();
-				// check if above threshold
 				if (candidateMag >= minMagnitude) {
-					// saved here for later analysis
-					bufferStorage.add(tempBuffer);
 					publishProgress(new Integer[]{Integer.valueOf(candidateFreq)});
+					bufferStorage.add(bufferArray);
 				}								
-				// next freq for loop
 				candidateFreq += freqStepper;
 			}				
 		}
@@ -232,86 +220,58 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	}
 	
 	@SuppressLint("UseSparseArrays")
-	private boolean magnitudeBufferScan(int windowType) {	
-		// use existing bufferStorage array for scanning.
-		// will result in same findings as magnitudeRecordScan()...
+	private boolean magnitudeBufferScan(int windowType, ArrayList<Integer> freqList) {	
+		if ((freqList == null) || (freqList.isEmpty())) {
+			activityLogger("Buffer Scan list empty.");
+			return false;
+		}
 		
 		if (bufferStorage != null) {
 			activityLogger("Start buffer scanning in " + bufferStorage.size() + " buffers.");
-			
-			// bufferStorage is ArrayList of Integer arrays,
 			// each Integer array *may* contain a binMod signal
-			double[] dArr;
 			freqMap = new HashMap<Integer, Integer>();
+			int freq;
+			double candidateMag;
+			ArrayList<Integer> freqCounter;
+			Goertzel goertzel;
 			
 			//TODO
 			// may want a maximum on this cos it could get big and ugly...			
-			for (Integer[] arrayInt : bufferStorage) {
-				// in each array, scan for magnitude
-				dArr = new double[arrayInt.length];
-				int i;
-				for (i = 0; i < dArr.length; i++) {
-					dArr[i] = (double)arrayInt[i];					
+			for (short[] arrayShort : bufferStorage) {
+				scanArray = new double[arrayShort.length];
+				for (int i = 0; i < scanArray.length; i++) {
+					scanArray[i] = (double)arrayShort[i];					
 				}
-				//
-				// default value set to 2
-				dArr = windowArray(windowType, dArr);
-				// end windowing
-				// find a single good freq
-				int candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
-				double minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE; // need a minimum here?	
-				int centreFreq = 0;
-
-				while (candidateFreq <= AudioSettings.DEFAULT_FREQUENCY_MAX) {
-					// look for any of our freqs here, increment by freqStepper,
-					// based upon checking each freq+freqStep == magnitude > DEFAULT_MAGNITUDE
-					// binMod signal will have multiples of 2 frequencies with possibly a clock as well.
-
-					// set Goertzel up to look for candidate in dArr
-					Goertzel goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, dArr);
-					goertzel.initGoertzel();
-					
-					// get its magnitude
-					double candidateMag = goertzel.getOptimisedMagnitude();
-					// check if above threshold
-					if (candidateMag >= minMagnitude) {
-						centreFreq = candidateFreq;
-					}								
-					// next freq for loop
-					candidateFreq += freqStepper;
-				}
-				// check number of occurrences of our centreFreq and any possible binMod freqs
-				int freq;
-				// reset these:
+				scanArray = windowArray(windowType, scanArray);
 				candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
-				minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE;
-				ArrayList<Integer> freqCounter = new ArrayList<Integer>();
-				// range here may be too small..
-				for (freq = centreFreq - AudioSettings.MAX_FREQ_STEP; 
-						freq <= centreFreq + AudioSettings.MAX_FREQ_STEP; 
-						freq += freqStepper) {
-					// set Goertzel up to count candidates in dArr
-					Goertzel goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)freq, dArr);
-					goertzel.initGoertzel();
+				
+				for (int checkFreq : freqList) {
+					freq = 0;
+					candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
+					minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE;
+					freqCounter = new ArrayList<Integer>();
 					
-					// get its magnitude
-					double candidateMag = goertzel.getOptimisedMagnitude();
-					// set magnitude floor, raises it
-					// check if above threshold
-					if (candidateMag >= minMagnitude) {
-						// the freq has a magnitude,
-						// note it and then allow loop to continue
-						freqCounter.add(freq);
+					// range here may be too small..
+					for (freq = checkFreq - AudioSettings.MAX_FREQ_STEP; 
+							freq <= checkFreq + AudioSettings.MAX_FREQ_STEP; 
+							freq += freqStepper) {
+
+						goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)freq, scanArray);
+						goertzel.initGoertzel();
+
+						candidateMag = goertzel.getOptimisedMagnitude();
+						if (candidateMag >= minMagnitude) {
+							freqCounter.add(freq);
+						}
 					}
-				}
-				// store any finds for later analysis
-				if (!freqCounter.isEmpty()) {
-					mapFrequencyCounts(freqCounter);
+					if (!freqCounter.isEmpty()) {
+						mapFrequencyCounts(freqCounter);
+					}
 				}
 			}
 			// end bufferStorage loop thru
 		}
-		activityLogger("finished  Buffer Scan loop.");
+		activityLogger("finished Buffer Scan loop.");
 		return true;
 	}
 
@@ -355,8 +315,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	
 	private void mapFrequencyCounts(ArrayList<Integer> freqList) {
 		// SparseIntArray is suggested...		
-		// this only counts, order of occurrence is not preserved.
-		
+		// this only counts, order of occurrence is not preserved.		
 		for (int freq : freqList) {
             if (freqMap.containsKey(freq)) {
                 freqMap.put(freq, freqMap.get(freq) + 1);

@@ -333,7 +333,9 @@ public class MainActivity extends Activity {
 		}
 		pilferShushScanner.mainPollingStop();	
 			
-		mainScanLogger("Listening for near-ultra high audio...", false);		
+		mainScanLogger("Listening for near-ultra high audio...", false);	
+		//TODO
+		// have a timer that auto shuts off?
 		pilferShushScanner.runAudioScanner();
 	}
 	
@@ -561,7 +563,7 @@ public class MainActivity extends Activity {
 	
 /********************************************************************/
 /* 
- * 	LOGGER	
+ * 	LOGGERS	
  */
 	private void mainScanLogger(String entry, boolean caution) {
 		// this prints to MainView.log

@@ -88,6 +88,10 @@ public class AudioVisualiserView extends View {
 	public void frequencyCaution(int frequency) {
 		// flash something or other	    
 		// canvas.drawLine(line.startX, line.startY, line.stopX, line.stopY, paint);
+		if (lineCounter * MULTIPLIER >= CAUTION_MAX) {
+			// until better solution, loop to beginning and draw over previous.
+			lineCounter = 0;
+		}
 		lineSpacer = RANGE - (lineCounter * (CAUTION_LINE_WIDTH + 2));
 		if (lineSpacer <= 0) lineSpacer = 0;
 
@@ -96,8 +100,6 @@ public class AudioVisualiserView extends View {
 		if (freqValue > CAUTION_LINE_MEDIAN) freqValue = CAUTION_LINE_MEDIAN;
 
 		if (mRect != null) {
-			if (lineCounter * MULTIPLIER >= CAUTION_MAX) return;
-			
 			cautionLines[lineCounter * MULTIPLIER] = mRect.width() - lineSpacer;
 			cautionLines[lineCounter * MULTIPLIER + 1] = rectMidHeight - CAUTION_LINE_MEDIAN - freqValue;
 			cautionLines[lineCounter * MULTIPLIER + 2] = mRect.width() - lineSpacer;

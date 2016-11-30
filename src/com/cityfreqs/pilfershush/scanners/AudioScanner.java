@@ -20,7 +20,7 @@ public class AudioScanner {
 	
 	private ArrayList<Integer> frequencySequence;
 	private ArrayList<String> freqCharSequence;	
-	private ArrayList<Integer[]> bufferStorage;
+	private ArrayList<short[]> bufferStorage;
 	private HashMap<Integer, Integer> freqMap;
 	private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
 	private Entry<Integer, Integer> logicZero;
@@ -38,7 +38,7 @@ public class AudioScanner {
 	public void resetAudioScanner() {
 		frequencySequence = new ArrayList<Integer>();
 		freqCharSequence = new ArrayList<String>();
-		bufferStorage = new ArrayList<Integer[]>();
+		bufferStorage = new ArrayList<short[]>();
 		audioDetected = false;
 		processAudio.resetSequences();	
 	}
@@ -102,7 +102,7 @@ public class AudioScanner {
 	// secondary scans using the bufferStorage, ideally looking for binMods.
 	public boolean runBufferScanner() {
 		//
-		return freqDetector.runBufferScanner(freqStep);
+		return freqDetector.runBufferScanner(frequencySequence);
 	}
 	
 	public void storeBufferScanMap() {
