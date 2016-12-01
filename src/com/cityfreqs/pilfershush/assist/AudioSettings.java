@@ -37,14 +37,14 @@ public class AudioSettings {
 	public static final int DEFAULT_FREQUENCY_MAX = 21000; // 22000
 	
 	// db = 20 log10(goertzel_magnitude).
-	public static final double DEFAULT_MAGNITUDE = 80000;
-	public static final double MAGNITUDE_50 = 500; // ~= 53.9794, spoken voice
-	public static final double MAGNITUDE_70 = 3000; // ~= 69.5425, busy traffic, TV
-	public static final double MAGNITUDE_80 = 10000; // ~= 80.0000, heavy traffic
-	public static final double MAGNITUDE_90 = 30000; // ~= 89.5424, truck traffic, shouting
-	public static final double MAGNITUDE_100 = DEFAULT_MAGNITUDE; // ~= 98.0618, jack hammer
+	public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
+	public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
+	public static final double MAGNITUDE_80 = 10000; // ~= 80.0000 dB
+	public static final double MAGNITUDE_90 = 30000; // ~= 89.5424 dB
+	public static final double MAGNITUDE_100 = 80000; // ~= 98.0618 dB
+	public static final double DEFAULT_MAGNITUDE = 80000; // set this lower?
 	
-	// steps in the frequencies to consider as a coded signal and not noise
+	// steps in the frequencies to consider as a coded signal
 	// multiples of 5 only
 	public static final int MIN_FREQ_STEP = 1;
 	public static final int FREQ_STEP_5 = 5;

@@ -159,6 +159,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 						MainActivity.visualiserView.updateVisualiser(byteBuffer);
 					}
 				});
+				
+				
 				// bufferArray IS short[], NOT byte[]
 				do {
 					bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());

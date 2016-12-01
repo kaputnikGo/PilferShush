@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
 		mainView = true;
 		
 		pilferShushScanner = new PilferShushScanner();
+		// headphone option not enabled, defaults to mute speakers
 		output = false;
 		SCANNING = false;
 		
@@ -214,11 +215,14 @@ public class MainActivity extends Activity {
 	
 	private void reportInitialState() {
 		mainScanText.setText("PilferShush scanner ready to scan for:");
-		mainScanLogger("\nFrequencies over " + AudioSettings.DEFAULT_FREQUENCY_MIN + " Hertz\n"
-				+ "separated by " + getResources().getString(R.string.freq_step_25_text) + "\n"
-				+ "above " + getResources().getString(R.string.magnitude_100_text) + ".", false);
+		mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + "+ Hz at " 
+				+ AudioSettings.DEFAULT_FREQ_STEP + "Hz steps, above 100 dB.", false);
+		
 		mainScanLogger("\nSettings can be changed via the Options menu.", false);
-		mainScanLogger("\nThe Detailed View has logging and more information from scans.", false);
+		mainScanLogger("\nThe Detailed View has logging and more information from scans. " +
+				"It also has a continuous Mic check and intermittent polling check " +
+				"to look for other apps using the microphone.", false);
+		
 		mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
 		mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
 	}
@@ -397,7 +401,7 @@ public class MainActivity extends Activity {
 		mainScanLogger("Stop listening for audio.", false);
 		
 		if (pilferShushScanner.hasAudioScanSequence()) {
-			mainScanLogger("Detected audio beacon modulated signal: \n", true);
+			mainScanLogger("Detected audio beacon signal: \n", true);
 			mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
 			
 			// a debug of all modfreq captures
@@ -417,16 +421,8 @@ public class MainActivity extends Activity {
 			}
 		}
 		else {
-			mainScanLogger("No detected audio beacon modulated signals.", false);
-		}
-		
-		if (pilferShushScanner.hasAudioScanCharSequence()) {
-			mainScanLogger("Detected audio beacon alphabet signal: \n", true);
-			mainScanLogger(pilferShushScanner.getAudioScanCharSequence(), true);
-		}
-		else {
-			mainScanLogger("No detected audio beacon alphabet signals.", false);
-		}
+			mainScanLogger("No detected audio beacon signals.", false);
+		}		
 		pilferShushScanner.stopBufferScanner();
 		mainScanLogger("\n[>-:end of scan:-<]\n\n", false);
 	}
@@ -468,7 +464,9 @@ public class MainActivity extends Activity {
 			alertDialog = dialogBuilder.create();
 			alertDialog.show();
 		}
-		entryLogger("NO USER APPS FOUND FOR OVERRIDE SCAN.", true);
+		else {
+			entryLogger("NO USER APPS FOUND FOR OVERRIDE SCAN.", true);
+		}
 		
 	}
 	

@@ -23,6 +23,7 @@ public class AudioVisualiserView extends View {
 	private Matrix mMatrix;
 	private Rect mRect = new Rect();
 	private int rectMidHeight;
+	private int cautionLineMedian;
 	private Paint mForePaint = new Paint();
 	private Paint mPeakPaint = new Paint();
 	private Paint mCautionPaint = new Paint();
@@ -37,7 +38,6 @@ public class AudioVisualiserView extends View {
 	private static final int MULTIPLIER = 4; // 4
 	private static final int RANGE = 256; // 128, 256, 384, 512
 	private static final int CAUTION_LINE_WIDTH = 6;
-	private static final int CAUTION_LINE_MEDIAN = 90;
 	private static final int CAUTION_MAX = 128;// needs to hold 32 bit binMod
 	
 	public AudioVisualiserView(Context context) {
@@ -68,13 +68,9 @@ public class AudioVisualiserView extends View {
 		mCautionPaint.setStrokeWidth(CAUTION_LINE_WIDTH);
 		mMatrix = new Matrix();
 		rectMidHeight = 0;
+		cautionLineMedian = 90; // guess quarter height of View
 		
 		cautionLines = new float[CAUTION_MAX];
-		cautionLines[0] = 0;
-		cautionLines[1] = 0;
-		cautionLines[2] = 0;
-		cautionLines[3] = 0;
-		
 		lineCounter = 0;
 		lineSpacer = 0;
 		freqValue = 0;
@@ -97,13 +93,13 @@ public class AudioVisualiserView extends View {
 
 		freqValue = frequency - AudioSettings.DEFAULT_FREQUENCY_MIN;
 		freqValue *= 0.03f;		
-		if (freqValue > CAUTION_LINE_MEDIAN) freqValue = CAUTION_LINE_MEDIAN;
+		if (freqValue > cautionLineMedian) freqValue = cautionLineMedian;
 
 		if (mRect != null) {
 			cautionLines[lineCounter * MULTIPLIER] = mRect.width() - lineSpacer;
-			cautionLines[lineCounter * MULTIPLIER + 1] = rectMidHeight - CAUTION_LINE_MEDIAN - freqValue;
+			cautionLines[lineCounter * MULTIPLIER + 1] = (rectMidHeight - cautionLineMedian) - freqValue;
 			cautionLines[lineCounter * MULTIPLIER + 2] = mRect.width() - lineSpacer;
-			cautionLines[lineCounter * MULTIPLIER + 3] = rectMidHeight + CAUTION_LINE_MEDIAN + freqValue;
+			cautionLines[lineCounter * MULTIPLIER + 3] = (rectMidHeight + cautionLineMedian) + freqValue;
 			lineCounter++;		
 		}
 	}
@@ -122,13 +118,14 @@ public class AudioVisualiserView extends View {
 		accumulator = 0;
 		
 		rectMidHeight = mRect.height() / 2;
+		cautionLineMedian = rectMidHeight / 2;
 		
 		for (int i = 0; i < mBytes.length - 1; i++) {
-			accumulator += Math.abs(mBytes[i]);
 			mPoints[i * MULTIPLIER] = mRect.width() * i / (mBytes.length - 1);
 			mPoints[i * MULTIPLIER + 1] = rectMidHeight + ((byte)(mBytes[i] + RANGE)) * (rectMidHeight) / RANGE;
 			mPoints[i * MULTIPLIER + 2] = mRect.width() * (i + 1) / (mBytes.length - 1);
 			mPoints[i * MULTIPLIER + 3] = rectMidHeight + ((byte)(mBytes[i + 1] + RANGE)) * (rectMidHeight) / RANGE;
+			accumulator += Math.abs(mBytes[i]);
 		}			
 	    if (mCanvasBitmap == null) {
 	    	mCanvasBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Config.ARGB_8888);

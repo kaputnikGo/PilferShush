@@ -20,7 +20,6 @@ public class AudioScanner {
 	private double magnitude;
 	
 	private ArrayList<Integer> frequencySequence;
-	private ArrayList<String> freqCharSequence;	
 	private ArrayList<short[]> bufferStorage;
 	private HashMap<Integer, Integer> freqMap;
 	private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
@@ -39,10 +38,8 @@ public class AudioScanner {
 	
 	public void resetAudioScanner() {
 		frequencySequence = new ArrayList<Integer>();
-		freqCharSequence = new ArrayList<String>();
 		bufferStorage = new ArrayList<short[]>();
-		audioDetected = false;
-		processAudio.resetSequences();	
+		audioDetected = false;	
 	}
 	
 	public void setFreqStep(int freqStep) {
@@ -194,24 +191,5 @@ public class AudioScanner {
 	
 	public ArrayList<Integer> getFreqSequence() {
 		return frequencySequence;
-	}
-	
-	public boolean processFreqCharSequence() {
-		for (int freq : frequencySequence) {
-			String str = processAudio.processFreqChar(freq);
-			if ((str != null) && (!str.equals(""))) {
-				freqCharSequence.add(str);
-				str = null;
-			}
-		}
-		// 
-		return !freqCharSequence.isEmpty();
-	}
-	
-	public ArrayList<String> getFreqCharSequence() {
-		if (freqCharSequence != null) 
-			return freqCharSequence;
-		else
-			return freqCharSequence = new ArrayList<>();
 	}
 }

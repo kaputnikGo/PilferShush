@@ -109,8 +109,6 @@ public class PilferShushScanner {
 			entryLogger("Buffer Scan found data.", true);
 			bufferScanReport = "";
 			audioScanner.storeBufferScanMap();
-			// do something with it
-			// process Audio has useful methods...
 			if (audioScanner.processBufferScanMap()) {
 				bufferScanReport = "Buffer Scan data: \n" + audioScanner.getLogicEntries();
 				entryLogger(bufferScanReport, true);
@@ -183,6 +181,9 @@ public class PilferShushScanner {
 		return audioScanner.getFrequencySequenceLogic();
 	}
 	
+/********************************************************************/	
+	// MainActivity.stopScanner() debug type outputs
+	// currently rem'd out
 	protected String getFrequencySequence() {
 		// get original sequence as transmitted...
 		String sequence = "";
@@ -198,20 +199,6 @@ public class PilferShushScanner {
 		return audioScanner.getFreqSeqLogicEntries();
 	}
 	
-	protected boolean hasAudioScanCharSequence() {
-		return audioScanner.processFreqCharSequence();
-	}
-	
-	protected String getAudioScanCharSequence() {
-		String sequence = "";
-		for (String seqString : audioScanner.getFreqCharSequence()) {
-			sequence += seqString;
-			// add a space
-			sequence += " ";
-		}
-		return sequence;
-	}
-	
 /********************************************************************/	
 	
 	private void initBackgroundChecks() {
@@ -222,67 +209,9 @@ public class PilferShushScanner {
 		}
 		else {
 			// is bad
-			MainActivity.logger("is broke");
+			MainActivity.logger("Cannot run user app checker.");
 		}
 	}	
-	
-/********************************************************************/			
-	
-	// currently using A-Z at 75 Hz gap.
-	// transmitted with 1000-500ms gap between each?
-	
-	//TODO
-	// this is on the GUI thread...
-	/*
-	private Runnable scannerRunner = new Runnable() {
-		@Override
-		public void run() {
-			try {				
-				if (audioScanner.audioDetected) {
-					// allow AudioScanner to continuously record for the sequence
-					//colourDelivery();
-					runningDelay = AudioSettings.SHORT_DELAY;
-				}
-				else {
-					runningDelay = AudioSettings.LONG_DELAY;
-				}
-				audioScanner.runAudioScanner();
-			}
-			finally {
-				handlerU.postDelayed(scannerRunner, runningDelay);
-			}
-		}
-	};
-	*/
-	
-	/*
-	protected void scannerAsync() {
-		new AsyncTask<Void, String, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                while(doScanning) {
-					
-                	if (audioScanner.audioDetected) {
-						// allow AudioScanner to continuously record for the sequence
-						//colourDelivery();
-						runningDelay = AudioSettings.SHORT_DELAY;
-					}
-					else {
-						runningDelay = AudioSettings.LONG_DELAY;
-					}
-                	
-					audioScanner.runAudioScanner();
-				}
-                return null;
-            }
-
-            @Override
-            protected void onProgressUpdate(String... values) {           	
-            	MainActivity.entryLogger("scannerAsync:\n\n " + Arrays.toString(values) + "\n", false);           	
-            }
-        }.execute();
-	}
-	*/
 	
 /********************************************************************/	
 /*
@@ -293,7 +222,7 @@ public class PilferShushScanner {
 		MainActivity.logger("run background checks...\n");
 		backgroundChecker.runChecker();
 		
-		MainActivity.logger("USER APPs with RECORD AUDIO: " 
+		MainActivity.logger("User apps with RECORD AUDIO ability: " 
 				+ backgroundChecker.getUserRecordNumApps() + "\n");
 
 		backgroundChecker.audioAppEntryLog();		

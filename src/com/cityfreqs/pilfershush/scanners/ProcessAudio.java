@@ -13,10 +13,7 @@ import android.annotation.SuppressLint;
 import com.cityfreqs.pilfershush.MainActivity;
 import com.cityfreqs.pilfershush.assist.AudioSettings;
 
-public class ProcessAudio {
-	private String tempSeq = new String();
-	private String startBit = "A";
-	private String stopBit = "a";	
+public class ProcessAudio {	
 	private Entry<Integer, Integer> logicZero;
 	private Entry<Integer, Integer> logicOne;
 	private List<Map.Entry<Integer,Integer>> entries;
@@ -34,19 +31,6 @@ public class ProcessAudio {
 	
 	public boolean hasFreqSequenceDuplicates(ArrayList<Integer> freqList) {
 		return checkSequenceDuplicates(freqList);
-	}
-	
-	public String processFreqChar(int candidateFreq) {
-		String str = processSingleChar(getCorrespondingChar(candidateFreq));
-		if ((str != null) && (!str.equals(""))) {
-			// reset
-			return str;
-		}
-		return null;
-	}
-	
-	public void resetSequences() {
-		tempSeq = new String();
 	}
 	
 	public String getLogicEntries() {
@@ -78,7 +62,7 @@ public class ProcessAudio {
 /********************************************************************/	
 	
 	private boolean checkFrequencyDivisor(int freq) {
-		return freq % AudioSettings.FREQ_DIVISOR == 0;
+		return (freq % AudioSettings.FREQ_DIVISOR) == 0;
 	}
 	
 	@SuppressLint("UseSparseArrays")
@@ -136,135 +120,9 @@ public class ProcessAudio {
 		}				
 		return false;
 	}
+
 	
-	
-	
-	//TODO need to add the freqStep, not the default 75 hertz...
-	// these may not correspond to anything...
-	private String getCorrespondingChar(int freq) {
-		switch (freq) {
-		    case 18000: 
-		    	return "A";
-		    case 18075: 
-		    	return "B";
-		    case 18150: 
-		    	return "C";
-		    case 18225: 
-		    	return "D";
-		    case 18300: 
-		    	return "E";
-		    case 18375: 
-		    	return "F";
-		    case 18450: 
-		    	return "G";
-		    case 18525: 
-		    	return "H";
-		    case 18600: 
-		    	return "I";
-		    case 18675: 
-		    	return "J";
-		    case 18750: 
-		    	return "K";
-		    case 18825: 
-		    	return "L";
-		    case 18900: 
-		    	return "M";
-		    case 18975: 
-		    	return "N";
-		    case 19050: 
-		    	return "O";
-		    case 19125: 
-		    	return "P";
-		    case 19200: 
-		    	return "Q";
-		    case 19275: 
-		    	return "R";
-		    case 19350: 
-		    	return "S";
-		    case 19425: 
-		    	return "T";
-		    case 19500: 
-		    	return "U";
-		    case 19575: 
-		    	return "V";
-		    case 19650: 
-		    	return "W";
-		    case 19725: 
-		    	return "X";
-		    case 19800: 
-		    	return "Y";
-		    case 19875: 
-		    	return "Z";
-		    case 19950:
-		    	return "a";
-			default: 
-				return null;
-		}
-	}
-	
-	// send single char to MainActivity
-	//TODO
-	// this logic for seq order not useful here,
-	// need to be more flexible for out of seq chars (ie not alphabetical, etc)
-	
-	private String processSingleChar(String candidateChar) {
-	    if (candidateChar == null || candidateChar == "") {
-	    	return null;
-	    }
-	    // START BIT
-	    if (candidateChar.compareTo(startBit) == 0) {
-	    	if (tempSeq.indexOf(startBit) != 0) {
-	    		tempSeq += startBit;
-	    		//MainActivity.logger(TAG, "found startBit.");
-	    	    // we have a startBit char
-		    	return startBit;
-	    	}
-	    	else {
-	    	    // we have a char
-	    		return null;
-	    	}
-	    }
-	    //STOP BIT
-	    else if (candidateChar.compareTo(stopBit) == 0) {
-	    	if (tempSeq.contains(startBit)) {
-	    		tempSeq += stopBit;
-		    	//MainActivity.logger(TAG, "found stopBit: tempSeq is: " + tempSeq);
-		    	tempSeq = new String();
-		    	return stopBit;
-	    	}
-	    	else {
-	    		// may have received it before complete payload...
-	    		return null;
-	    	}
-	    }
-	    //PAYLOAD
-	    else if (tempSeq.indexOf(startBit) == 0) {
-	    	if (!tempSeq.contains(candidateChar)) {
-	    		if (candidateChar.compareTo(tempSeq.substring(tempSeq.length() - 1)) > 0) {
-		    		// check if alphabetical		    		
-		    		tempSeq += candidateChar;
-		    		return candidateChar;
-	    		}
-	    		else {
-		    		// out of alphabetical order
-		    		return null;
-	    		}
-	    	}
-	    	else {
-	    	    // we have dupe char?
-    			return null;
-	    	}
-	    }
-	    //CATCH AND DEFAULT
-	    else {
-	    	if (tempSeq.length() >= AudioSettings.MAX_SEQUENCE_LENGTH) {
-	    		//MainActivity.logger(TAG, "tempSeq is filled.");
-	    		return null;
-	    	}
-    	    // we have a char out of sequence
-    		return null;
-	    }
-	}	
+/********************************************************************/	
 	
 	private void debugProcessAudio(String message) {
 		MainActivity.logger(message);
