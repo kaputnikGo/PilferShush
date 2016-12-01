@@ -36,6 +36,10 @@ public class MainActivity extends Activity {
 	private Button mainViewButton;
 	private TextView mainScanText;
 	
+	private String[] pollSpeedList;
+	private String[] freqSteps;
+	private String[] dbLevel;
+	
 	private boolean output;	
 	private boolean checkAble;
 	private boolean micChecking;
@@ -172,6 +176,9 @@ public class MainActivity extends Activity {
 			case R.id.action_audio_scan_settings:
 				changeAudioScanSettings();
 				return true;
+			case R.id.action_sensitivity_settings:
+				changeSensitivitySettings();
+				return true;
 			case R.id.action_audio_beacons:
 				hasAudioBeaconAppsList();
 				return true;
@@ -196,6 +203,8 @@ public class MainActivity extends Activity {
 			toggleHeadset(output);
 			quickAudioFocusCheck();
 			initAudioFocusListener();
+			populateMenuItems();
+			reportInitialState();
 		}
 		else {
 			mainScanLogger("PilferShush init failed.", true);
@@ -203,40 +212,60 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	private void changePollingSpeed() {
-		// set the interval delay for polling,
-		// make it a radio button list of presets, or slow, med, fast 
-		// limits are: 1000 and 6000 (1 sec and 6 sec) ??
+	private void reportInitialState() {
+		mainScanText.setText("PilferShush scanner ready to scan for:");
+		mainScanLogger("\nFrequencies over " + AudioSettings.DEFAULT_FREQUENCY_MIN + " Hertz\n"
+				+ "separated by " + getResources().getString(R.string.freq_step_25_text) + "\n"
+				+ "above " + getResources().getString(R.string.magnitude_100_text) + ".", false);
+		mainScanLogger("\nSettings can be changed via the Options menu.", false);
+		mainScanLogger("\nThe Detailed View has logging and more information from scans.", false);
+		mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
+		mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
+	}
+	
+	private void populateMenuItems() {
+		pollSpeedList = new String[4];
+		pollSpeedList[0] = getResources().getString(R.string.polling_1_text);
+		pollSpeedList[1] = getResources().getString(R.string.polling_2_text);
+		pollSpeedList[2] = getResources().getString(R.string.polling_3_text);
+		pollSpeedList[3] = getResources().getString(R.string.polling_default_text);
 		
+		freqSteps = new String[5];
+		freqSteps[0] = getResources().getString(R.string.freq_step_10_text);
+		freqSteps[1] = getResources().getString(R.string.freq_step_25_text);
+		freqSteps[2] = getResources().getString(R.string.freq_step_50_text);
+		freqSteps[3] = getResources().getString(R.string.freq_step_75_text);
+		freqSteps[4] = getResources().getString(R.string.freq_step_100_text);
+		
+		dbLevel = new String[5];
+		dbLevel[0] = getResources().getString(R.string.magnitude_50_text);
+		dbLevel[1] = getResources().getString(R.string.magnitude_70_text);
+		dbLevel[2] = getResources().getString(R.string.magnitude_80_text);
+		dbLevel[3] = getResources().getString(R.string.magnitude_90_text);
+		dbLevel[4] = getResources().getString(R.string.magnitude_100_text);
+	}
+	
+	private void changePollingSpeed() {		
 		if (polling) {
 			// stop it
 			togglePollingCheck();
-		}
-		
-		dialogBuilder = new AlertDialog.Builder(this);
-		// make a proper list somewhere..
-		String[] pollSpeedList = new String[4];
-		pollSpeedList[0] = "1 second";
-		pollSpeedList[1] = "2 seconds";
-		pollSpeedList[2] = "3 seconds";
-		pollSpeedList[3] = "default";
-		
-		
+		}		
+		dialogBuilder = new AlertDialog.Builder(this);			
 		dialogBuilder.setItems(pollSpeedList, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialogInterface, int which) {
 				switch(which) {
 					case 0:				
-						pilferShushScanner.setPollingSpeed(PollAudioChecker.SHORT_DELAY);
+						pilferShushScanner.setPollingSpeed(AudioSettings.SHORT_DELAY);
 						break;
 					case 1:
-						pilferShushScanner.setPollingSpeed(2000);
+						pilferShushScanner.setPollingSpeed(AudioSettings.SEC_2_DELAY);
 						break;
 					case 2:
-						pilferShushScanner.setPollingSpeed(3000);
+						pilferShushScanner.setPollingSpeed(AudioSettings.SEC_3_DELAY);
 						break;
 					case 3:
 					default:
-						pilferShushScanner.setPollingSpeed(PollAudioChecker.LONG_DELAY);
+						pilferShushScanner.setPollingSpeed(AudioSettings.LONG_DELAY);
 						break;
 				}					
 			}
@@ -247,48 +276,68 @@ public class MainActivity extends Activity {
 	}
 	
 	private void changeAudioScanSettings() {
-		dialogBuilder = new AlertDialog.Builder(this);
-		
-		String[] freqSteps = new String[5];
-		freqSteps[0] = "10 Hz";
-		freqSteps[1] = "25 Hz";
-		freqSteps[2] = "50 Hz";
-		freqSteps[3] = "75 Hz";
-		freqSteps[4] = "100 Hz";
-		
+		dialogBuilder = new AlertDialog.Builder(this);	
 		dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialogInterface, int which) {
 				switch(which) {
 					case 0:				
-						pilferShushScanner.setFrequencyStep(10);
+						pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_10);
 						break;
 					case 1:
-						pilferShushScanner.setFrequencyStep(25);
+						pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_25);
 						break;
 					case 2:
-						pilferShushScanner.setFrequencyStep(50);
+						pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_50);
 						break;
 					case 3:
-						pilferShushScanner.setFrequencyStep(75);
+						pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_75);
 						break;
 					case 4:
-						pilferShushScanner.setFrequencyStep(100);
+						pilferShushScanner.setFrequencyStep(AudioSettings.MAX_FREQ_STEP);
 						break;
 					default:
 						pilferShushScanner.setFrequencyStep(AudioSettings.DEFAULT_FREQ_STEP);	
 				}					
 			}
-		});
-		
+		});		
 		dialogBuilder.setTitle(R.string.dialog_freq_step);
 		alertDialog = dialogBuilder.create();
 		alertDialog.show();
 	}
 	
+	private void changeSensitivitySettings() {
+		dialogBuilder = new AlertDialog.Builder(this);		
+		dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialogInterface, int which) {
+				switch(which) {
+					case 0:				
+						pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_50);
+						break;
+					case 1:
+						pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_70);
+						break;
+					case 2:
+						pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_80);
+						break;
+					case 3:
+						pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_90);
+						break;
+					case 4:
+						pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_100);
+						break;
+					default:
+						pilferShushScanner.setMinMagnitude(AudioSettings.DEFAULT_MAGNITUDE);
+				}
+			}
+		});		
+		dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
+		alertDialog = dialogBuilder.create();
+		alertDialog.show();
+	}
 
 /********************************************************************/	
 /*
- * ACTION SCANS
+ * ACTIVE SCANS
  */	
 	private void toggleScanning() {
 		logger("Scanning button pressed");
@@ -360,9 +409,11 @@ public class MainActivity extends Activity {
 				mainScanLogger("Running scans on captured signals...", false);
 				if (pilferShushScanner.runBufferScanner()) {
 					mainScanLogger("Found buffer scan data:", true);
-					// do something with it...
 					mainScanLogger(pilferShushScanner.getBufferScanReport(), true);
-				}				
+				}
+				else {
+					mainScanLogger("No buffer scan data found.", false);
+				}
 			}
 		}
 		else {

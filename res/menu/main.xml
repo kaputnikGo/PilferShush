@@ -14,14 +14,20 @@
         android:title="@string/action_audio_scan_settings"/>
     
     <item
-        android:id="@+id/action_audio_beacons"
+        android:id="@+id/action_sensitivity_settings"
         android:orderInCategory="30"
+        android:showAsAction="never"
+        android:title="@string/action_sensitivity_settings"/>
+    
+    <item
+        android:id="@+id/action_audio_beacons"
+        android:orderInCategory="40"
         android:showAsAction="never"
         android:title="@string/action_audio_beacons"/>
      
     <item
         android:id="@+id/action_override_scan"
-        android:orderInCategory="40"
+        android:orderInCategory="50"
         android:showAsAction="never"
         android:title="@string/action_override_scan"/>     
     

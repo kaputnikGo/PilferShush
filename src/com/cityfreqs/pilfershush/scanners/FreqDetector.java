@@ -10,7 +10,8 @@ import android.os.AsyncTask;
 public class FreqDetector {	
 	private RecordTask recordTask;
 	private AudioSettings audioSettings;
-	private int frequencyStepper;	
+	private int frequencyStepper;
+	private double magnitude;
 	
 	protected interface RecordTaskListener {
 		void onFailure(String paramString);
@@ -23,14 +24,15 @@ public class FreqDetector {
 
 /********************************************************************/
 
-	protected void init(int frequencyStepper) {
+	protected void init(int frequencyStepper, double magnitude) {
 		this.frequencyStepper = frequencyStepper;
-		recordTask = new RecordTask(audioSettings, frequencyStepper);
+		this.magnitude = magnitude;
+		recordTask = new RecordTask(audioSettings, frequencyStepper, magnitude);
 	}
 	
 	protected void startRecording(RecordTaskListener recordTaskListener) {
 		if (recordTask == null) {
-			recordTask = new RecordTask(audioSettings, frequencyStepper);
+			recordTask = new RecordTask(audioSettings, frequencyStepper, magnitude);
 		}
 		startRecordTaskListener(recordTaskListener);		
 	}

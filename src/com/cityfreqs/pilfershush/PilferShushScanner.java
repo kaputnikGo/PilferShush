@@ -70,6 +70,11 @@ public class PilferShushScanner {
 		entryLogger("FreqStep changed to: " + step, false);
 	}
 	
+	protected void setMinMagnitude(double magnitude) {
+		audioScanner.setMinMagnitude(magnitude);
+		entryLogger("Magnitude level set: " + magnitude, false);
+	}
+	
 	protected void runAudioScanner() {
 		entryLogger("AudioScanning start...", false);
 		scanBufferSize = 0;

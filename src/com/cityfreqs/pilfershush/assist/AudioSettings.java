@@ -36,14 +36,22 @@ public class AudioSettings {
 	public static final int DEFAULT_FREQUENCY_MIN = 18000;
 	public static final int DEFAULT_FREQUENCY_MAX = 21000; // 22000
 	
-	public static final int DEFAULT_MAGNITUDE = 80000; // was 50000
-	// possible::
 	// db = 20 log10(goertzel_magnitude).
-	// 50000 ~= 93.9794
-	// 80000 ~= 98.0618
+	public static final double DEFAULT_MAGNITUDE = 80000;
+	public static final double MAGNITUDE_50 = 500; // ~= 53.9794, spoken voice
+	public static final double MAGNITUDE_70 = 3000; // ~= 69.5425, busy traffic, TV
+	public static final double MAGNITUDE_80 = 10000; // ~= 80.0000, heavy traffic
+	public static final double MAGNITUDE_90 = 30000; // ~= 89.5424, truck traffic, shouting
+	public static final double MAGNITUDE_100 = DEFAULT_MAGNITUDE; // ~= 98.0618, jack hammer
 	
 	// steps in the frequencies to consider as a coded signal and not noise
+	// multiples of 5 only
 	public static final int MIN_FREQ_STEP = 1;
+	public static final int FREQ_STEP_5 = 5;
+	public static final int FREQ_STEP_10 = 10;
+	public static final int FREQ_STEP_25 = 25;
+	public static final int FREQ_STEP_50 = 50;
+	public static final int FREQ_STEP_75 = 75;
 	public static final int MAX_FREQ_STEP = 100;
 	public static final int DEFAULT_FREQ_STEP = 25;
 	public static final int FREQ_DIVISOR = 25;
@@ -56,8 +64,10 @@ public class AudioSettings {
 	
 	// scanning delay for runner
 	public static final int MICRO_DELAY = 1; // for modulated code
-	public static final int SHORT_DELAY = 10;
-	public static final int LONG_DELAY = 1000;
+	public static final int SHORT_DELAY = 1000;
+	public static final int SEC_2_DELAY = 2000;
+	public static final int SEC_3_DELAY = 3000;	
+	public static final int LONG_DELAY = 6000;
 	
 	// vars for AudioRecord creation and use
 	private int sampleRate;

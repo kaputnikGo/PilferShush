@@ -1,6 +1,8 @@
 package com.cityfreqs.pilfershush;
 
 
+import com.cityfreqs.pilfershush.assist.AudioSettings;
+
 import android.media.AudioRecord;
 import android.os.Handler;
 
@@ -12,10 +14,7 @@ public class PollAudioChecker {
 	private int channel;
 	private int audioSource;
 	private int audioSessionId;
-	
-	protected static final int LONG_DELAY = 6000;
-	protected static final int SHORT_DELAY = 1000;
-	private int runningDelay = LONG_DELAY;
+	private int runningDelay = AudioSettings.LONG_DELAY;
 	private int userDelay;
 	
 	private Handler handlerU;
@@ -31,7 +30,7 @@ public class PollAudioChecker {
 		this.encoding = encoding;
 		this.bufferSize = bufferSize;
 		audioSessionId = 0;
-		userDelay = LONG_DELAY;
+		userDelay = AudioSettings.LONG_DELAY;
 		
 		detected = false;
 		polling = false;
@@ -107,7 +106,7 @@ public class PollAudioChecker {
 			try {				
 				if (detected) {
 					// speed up polling
-					runningDelay = SHORT_DELAY;
+					runningDelay = AudioSettings.SHORT_DELAY;
 				}
 				else {
 					runningDelay = userDelay;

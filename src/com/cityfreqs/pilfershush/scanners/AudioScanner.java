@@ -17,6 +17,7 @@ public class AudioScanner {
 	private AudioSettings audioSettings;
 	public boolean audioDetected;
 	private int freqStep;
+	private double magnitude;
 	
 	private ArrayList<Integer> frequencySequence;
 	private ArrayList<String> freqCharSequence;	
@@ -29,8 +30,9 @@ public class AudioScanner {
 	public AudioScanner(AudioSettings audioSettings) {
 		this.audioSettings = audioSettings;
 		freqStep = AudioSettings.DEFAULT_FREQ_STEP;
+		magnitude = AudioSettings.DEFAULT_MAGNITUDE;
 		freqDetector = new FreqDetector(this.audioSettings);
-		freqDetector.init(freqStep);
+		freqDetector.init(freqStep, magnitude);
 		processAudio = new ProcessAudio();
 		resetAudioScanner();
 	}
@@ -52,6 +54,14 @@ public class AudioScanner {
 			// is a default...
 			this.freqStep = AudioSettings.DEFAULT_FREQ_STEP;
 		}
+	}
+	
+	public void setMinMagnitude(double magnitude) {
+		this.magnitude = magnitude;
+	}
+	
+	public double getMagnitude() {
+		return magnitude;
 	}
 	
 	public void runAudioScanner() {	       

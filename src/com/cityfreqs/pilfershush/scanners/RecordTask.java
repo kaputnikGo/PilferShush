@@ -29,18 +29,15 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	private ArrayList<short[]> bufferStorage;
 	private HashMap<Integer, Integer> freqMap;
 	
-	public RecordTask(AudioSettings audioSettings, int freqStepper) {	
+	public RecordTask(AudioSettings audioSettings, int freqStepper, double magnitude) {	
 		this.audioSettings = audioSettings;
 		this.freqStepper = freqStepper;
-		minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE;
+		minMagnitude = magnitude;
 		bufferArray = new short[audioSettings.getBufferSize()];
 		bufferStorage = new ArrayList<short[]>();
 		
 		if (audioRecord == null) {
 			try {
-				//TODO
-				// get buffer in powersOfTwo higher than minBufferSize?
-				// we have 48Hz samRate...
 				audioRecord = new AudioRecord(audioSettings.getAudioSource(), 
 						audioSettings.getSampleRate(), 
 						audioSettings.getChannel(), 
@@ -104,6 +101,15 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 	
 	protected HashMap<Integer, Integer> getFrequencyCountMap() {
 		return freqMap;
+	}
+	
+	protected double getMinMagnitude() {
+		return minMagnitude;
+	}
+	
+	protected void setMinMagnitude(double magnitude) {
+		// checks here?
+		minMagnitude = magnitude;
 	}
 
 	
@@ -209,6 +215,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 				
 				if (candidateMag >= minMagnitude) {
 					publishProgress(new Integer[]{Integer.valueOf(candidateFreq)});
+					// store containing array for later magnitudeBufferScan
 					bufferStorage.add(bufferArray);
 				}								
 				candidateFreq += freqStepper;
@@ -243,22 +250,21 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 					scanArray[i] = (double)arrayShort[i];					
 				}
 				scanArray = windowArray(windowType, scanArray);
-				candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
-				
+								
 				for (int checkFreq : freqList) {
 					freq = 0;
-					candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
-					minMagnitude = (double)AudioSettings.DEFAULT_MAGNITUDE;
 					freqCounter = new ArrayList<Integer>();
 					
-					// range here may be too small..
+					// range here may be too small/large...
 					for (freq = checkFreq - AudioSettings.MAX_FREQ_STEP; 
 							freq <= checkFreq + AudioSettings.MAX_FREQ_STEP; 
-							freq += freqStepper) {
+							freq += AudioSettings.FREQ_STEP_25) {
 
 						goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)freq, scanArray);
 						goertzel.initGoertzel();
 
+						// this can result in a dupe, 
+						// we need not just the highest above minMag but a narrow range?
 						candidateMag = goertzel.getOptimisedMagnitude();
 						if (candidateMag >= minMagnitude) {
 							freqCounter.add(freq);
@@ -271,7 +277,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 			}
 			// end bufferStorage loop thru
 		}
-		activityLogger("finished Buffer Scan loop.");
+		activityLogger("finished Buffer Scan loop with " + freqMap.size() + " entries.");
 		return true;
 	}
 

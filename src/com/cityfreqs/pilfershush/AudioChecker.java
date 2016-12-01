@@ -25,7 +25,7 @@ public class AudioChecker {
 	
 	public AudioChecker() {
 		//
-		userPollSpeed = PollAudioChecker.LONG_DELAY;
+		userPollSpeed = AudioSettings.LONG_DELAY;
 		audioSettings = new AudioSettings();
 	}
 	
@@ -45,6 +45,8 @@ public class AudioChecker {
  */	
 	protected boolean determineInternalAudioType() {
 		// guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_MONO
+		int minBuffSize = 0;
+		int buffSize = 0;
 		for (int rate : AudioSettings.SAMPLE_RATES) {
 	        for (short audioFormat : new short[] { 
 	        		AudioFormat.ENCODING_PCM_16BIT,
@@ -57,7 +59,10 @@ public class AudioChecker {
 	                try {
 	                    MainActivity.logger("Try rate " + rate + "Hz, enc: " + audioFormat + ", channel: "+ channelConfig);
 	                    
-	                    int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+	                    // get a better sized buffer for recording?: powersTwo > minBuff
+	                    minBuffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+	                    buffSize = AudioSettings.getClosestPowersHigh(minBuffSize);
+	                    
 	                    if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
 	                        // check if we can instantiate and have a success
 	                        AudioRecord recorder = new AudioRecord(
@@ -68,7 +73,9 @@ public class AudioChecker {
 	                        		buffSize);
 
 	                        if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
-	                        	MainActivity.logger("found, rate: " + rate + ", min-buff: " + buffSize);
+	                        	MainActivity.logger("found, rate: " + rate + ", minBuff: " 
+	                        			+ minBuffSize + ", used buffer: " + buffSize);
+	                        	
 	                        	// set our values
 	                        	sampleRate = rate;
 	                        	channel = channelConfig;

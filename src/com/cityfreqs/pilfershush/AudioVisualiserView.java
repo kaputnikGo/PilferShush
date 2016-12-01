@@ -35,7 +35,7 @@ public class AudioVisualiserView extends View {
 	private float freqValue;
 	
 	private static final int MULTIPLIER = 4; // 4
-	private static final int RANGE = 256; // 128, 256
+	private static final int RANGE = 256; // 128, 256, 384, 512
 	private static final int CAUTION_LINE_WIDTH = 6;
 	private static final int CAUTION_LINE_MEDIAN = 90;
 	private static final int CAUTION_MAX = 128;// needs to hold 32 bit binMod
